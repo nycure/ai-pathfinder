@@ -4,6 +4,8 @@
 
 **Autonomous, Multi-Agent Personalized Learning Path Recommender & Active Mastery Platform**
 
+*Built with ❤️ by Team **The High Council***
+
 [![Next.js](https://img.shields.io/badge/Next.js-15.3-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Google Gemini](https://img.shields.io/badge/Google%20GenAI-Gemini%202.5%20Flash-4285F4?style=flat&logo=google)](https://ai.google.dev/)
@@ -282,6 +284,18 @@ npm run build
 
 ---
 
+## 👥 Built with ❤️ by Team **The High Council**
+
+| Member Name | Email Contact |
+| :--- | :--- |
+| **Nitin Yadav** | [ny172418@gmail.com](mailto:ny172418@gmail.com) |
+| **Himanshu Tiwary** | [htiwary09@gmail.com](mailto:htiwary09@gmail.com) |
+| **Kritika Jha** | [kritikajha944@gmail.com](mailto:kritikajha944@gmail.com) |
+| **Anand Prem** | [anandprem2565@gmail.com](mailto:anandprem2565@gmail.com) |
+
+---
+
 ## 📄 License
 
 This project is licensed under the **MIT License**.
+
