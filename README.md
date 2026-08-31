@@ -216,24 +216,24 @@ npm run dev
 
 ---
 
-## 🚀 100% Free Production Deployment Blueprint
+## 🚀 Production Cloud Deployment Guide
 
-Deploy AI Pathfinder live on the internet at **$0/month** using free-tier cloud services:
+Deploy AI Pathfinder across modern cloud platforms (Vercel, Render/Koyeb/AWS, and Supabase):
 
 ```
 ┌─────────────────┬───────────────────┬──────────────────────────────────────────┐
-│ Component       │ Platform          │ Free Tier Details                        │
+│ Component       │ Platform          │ Architecture & Hosting Details           │
 ├─────────────────┼───────────────────┼──────────────────────────────────────────┤
-│ Frontend        │ Vercel            │ Unlimited deployments, global edge CDN   │
-│ Backend API     │ Render / Koyeb    │ 750 free hours/mo, native Python support │
-│ Database & Auth │ Supabase          │ 500 MB PostgreSQL, 50,000 monthly users  │
-│ LLM Inference   │ Google AI Studio  │ Generous free tier on Gemini 2.5 Flash   │
-│ Caching Layer   │ Built-in LRU      │ Runs in-process with 0 external costs    │
+│ Frontend        │ Vercel            │ Next.js 15 SSR, edge routing, global CDN │
+│ Backend API     │ Render / Koyeb    │ FastAPI ASGI service with Uvicorn        │
+│ Database & Auth │ Supabase          │ PostgreSQL 15+, Row-Level Security (RLS) │
+│ LLM Inference   │ Google AI Studio  │ Google Gemini 2.5 Flash GenAI SDK        │
+│ Caching Layer   │ Built-in LRU      │ High-speed memory-bounded LRU caching    │
 └─────────────────┴───────────────────┴──────────────────────────────────────────┘
 ```
 
 ### 1. Database Setup (Supabase)
-1. Create a free project at [supabase.com](https://supabase.com).
+1. Create a project at [supabase.com](https://supabase.com).
 2. Open the **SQL Editor** and execute `backend/db/schema.sql` to instantiate all tables, indexes, triggers, and Row-Level Security policies.
 3. Under **Authentication -> URL Configuration**, set:
    - **Site URL**: `https://your-app.vercel.app`
