@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoadmapStore } from '@/store/useRoadmapStore';
 import { GoalChat } from '@/components/chat/GoalChat';
@@ -11,12 +11,20 @@ import { createClient } from '@/lib/supabase/client';
 
 export default function Home() {
   const { roadmap, initializeState, isLoading, reset } = useRoadmapStore();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserEmail(user.email ?? user.user_metadata?.username ?? 'Learner');
+      } else {
+        router.push('/login');
+      }
+    });
     initializeState();
-  }, [initializeState]);
+  }, [initializeState, router, supabase]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -42,10 +50,16 @@ export default function Home() {
       {!roadmap ? (
         // Initial state: Only show Goal Chat vertically centered
         <div className="flex-1 flex flex-col justify-center items-center w-full max-w-4xl relative">
-          <div className="w-full flex justify-end mb-2">
+          <div className="w-full flex justify-end items-center gap-3 mb-2">
+            {userEmail && (
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                {userEmail}
+              </div>
+            )}
             <button 
               onClick={handleSignOut}
-              className="text-xs px-3 py-1.5 rounded-md bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              className="text-xs px-3 py-1.5 rounded-md bg-secondary/50 hover:bg-destructive/20 hover:text-destructive text-muted-foreground transition-colors"
             >
               Sign Out
             </button>
@@ -67,12 +81,20 @@ export default function Home() {
             <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
               AI Pathfinder
             </h1>
-            <button 
-              onClick={handleSignOut}
-              className="text-sm px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-            >
-              Sign Out
-            </button>
+            <div className="flex items-center gap-3">
+              {userEmail && (
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  {userEmail}
+                </div>
+              )}
+              <button 
+                onClick={handleSignOut}
+                className="text-sm px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-destructive/20 hover:text-destructive transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
           </header>
           
           <LearnerDashboard />

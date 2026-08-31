@@ -40,21 +40,37 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  // Allow public routes and static assets
-  if (
-    !user &&
-    !pathname.startsWith('/login') &&
-    !pathname.startsWith('/signup') &&
-    !pathname.startsWith('/auth') &&
-    pathname !== '/'
-  ) {
-    // If user is accessing protected routes, redirect to login
-    // Note: Public portfolio /{username} is dynamic and allowed if needed
-    return supabaseResponse
+  // 1. If user is authenticated and trying to access /login or /signup, redirect to home
+  if (user && (pathname === '/login' || pathname === '/signup')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
+  }
+
+  // 2. If user is NOT authenticated
+  if (!user) {
+    // Allow public authentication routes
+    if (
+      pathname.startsWith('/login') ||
+      pathname.startsWith('/signup') ||
+      pathname.startsWith('/auth')
+    ) {
+      return supabaseResponse
+    }
+
+    // Root path (/) requires authentication to create & save personal roadmaps
+    if (pathname === '/') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    // Note: Public vanity portfolios (e.g. /[username]) remain accessible to guests
   }
 
   return supabaseResponse
 }
+
 
 export const config = {
   matcher: [
