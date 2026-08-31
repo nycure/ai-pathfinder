@@ -1,0 +1,134 @@
+[
+  {
+    "id": "res_python_1",
+    "title": "Python for Everybody Specialization",
+    "provider": "Coursera",
+    "url": "https://www.coursera.org/specializations/python",
+    "type": "course",
+    "estimated_hours": 40,
+    "cost": "freemium",
+    "rating": 4.8,
+    "skills_covered": ["python_basics"]
+  },
+  {
+    "id": "res_ds_1",
+    "title": "Data Structures and Algorithms Specialization",
+    "provider": "Coursera",
+    "url": "https://www.coursera.org/specializations/data-structures-algorithms",
+    "type": "course",
+    "estimated_hours": 60,
+    "cost": "freemium",
+    "rating": 4.7,
+    "skills_covered": ["data_structures"]
+  },
+  {
+    "id": "res_ml_1",
+    "title": "Machine Learning Specialization",
+    "provider": "DeepLearning.AI",
+    "url": "https://www.coursera.org/specializations/machine-learning-introduction",
+    "type": "course",
+    "estimated_hours": 80,
+    "cost": "freemium",
+    "rating": 4.9,
+    "skills_covered": ["machine_learning_basics", "linear_algebra", "calculus"]
+  },
+  {
+    "id": "res_dl_1",
+    "title": "Deep Learning Specialization",
+    "provider": "DeepLearning.AI",
+    "url": "https://www.coursera.org/specializations/deep-learning",
+    "type": "course",
+    "estimated_hours": 100,
+    "cost": "freemium",
+    "rating": 4.9,
+    "skills_covered": ["deep_learning", "nlp_basics"]
+  },
+  {
+    "id": "res_hf_1",
+    "title": "Hugging Face NLP Course",
+    "provider": "Hugging Face",
+    "url": "https://huggingface.co/course/chapter1/1",
+    "type": "course",
+    "estimated_hours": 30,
+    "cost": "free",
+    "rating": 4.9,
+    "skills_covered": ["transformers", "nlp_basics"]
+  },
+  {
+    "id": "res_lora_1",
+    "title": "LoRA: Low-Rank Adaptation of Large Language Models (Paper/Code)",
+    "provider": "GitHub",
+    "url": "https://github.com/microsoft/LoRA",
+    "type": "project",
+    "estimated_hours": 15,
+    "cost": "free",
+    "rating": 4.8,
+    "skills_covered": ["llm_finetuning"]
+  },
+  {
+    "id": "res_vec_1",
+    "title": "Chroma Vector Database Documentation",
+    "provider": "ChromaDB",
+    "url": "https://docs.trychroma.com/",
+    "type": "documentation",
+    "estimated_hours": 5,
+    "cost": "free",
+    "rating": 4.7,
+    "skills_covered": ["vector_databases"]
+  },
+  {
+    "id": "res_rag_1",
+    "title": "Building RAG Applications with LangChain",
+    "provider": "DeepLearning.AI",
+    "url": "https://www.deeplearning.ai/short-courses/langchain-chat-with-your-data/",
+    "type": "course",
+    "estimated_hours": 10,
+    "cost": "free",
+    "rating": 4.8,
+    "skills_covered": ["rag_architecture"]
+  },
+  {
+    "id": "res_fastapi_1",
+    "title": "FastAPI Full Stack Tutorial",
+    "provider": "FastAPI Docs",
+    "url": "https://fastapi.tiangolo.com/tutorial/",
+    "type": "documentation",
+    "estimated_hours": 20,
+    "cost": "free",
+    "rating": 4.9,
+    "skills_covered": ["fastapi_basics"]
+  },
+  {
+    "id": "res_react_1",
+    "title": "React - The Complete Guide",
+    "provider": "Udemy",
+    "url": "https://www.udemy.com/course/react-the-complete-guide-incl-redux/",
+    "type": "course",
+    "estimated_hours": 50,
+    "cost": "paid",
+    "rating": 4.8,
+    "skills_covered": ["react_basics"]
+  },
+  {
+    "id": "res_next_1",
+    "title": "Next.js Official Foundations Course",
+    "provider": "Vercel",
+    "url": "https://nextjs.org/learn",
+    "type": "course",
+    "estimated_hours": 15,
+    "cost": "free",
+    "rating": 4.9,
+    "skills_covered": ["nextjs"]
+  },
+  {
+    "id": "res_full_1",
+    "title": "Build an AI-Powered Next.js + FastAPI App",
+    "provider": "YouTube",
+    "url": "https://www.youtube.com/watch?v=fullstack",
+    "type": "video",
+    "estimated_hours": 5,
+    "cost": "free",
+    "rating": 4.6,
+    "skills_covered": ["fullstack_genai"]
+  }
+]

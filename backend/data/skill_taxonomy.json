@@ -1,0 +1,37 @@
+{
+  "skills": [
+    { "id": "python_basics", "name": "Python Fundamentals", "category": "programming" },
+    { "id": "data_structures", "name": "Data Structures & Algorithms", "category": "programming" },
+    { "id": "linear_algebra", "name": "Linear Algebra", "category": "math" },
+    { "id": "calculus", "name": "Multivariable Calculus", "category": "math" },
+    { "id": "machine_learning_basics", "name": "Machine Learning Basics", "category": "ai" },
+    { "id": "deep_learning", "name": "Deep Learning Fundamentals", "category": "ai" },
+    { "id": "nlp_basics", "name": "Natural Language Processing", "category": "ai" },
+    { "id": "transformers", "name": "Transformer Architecture", "category": "ai" },
+    { "id": "llm_finetuning", "name": "LLM Fine-Tuning (LoRA)", "category": "ai" },
+    { "id": "vector_databases", "name": "Vector Databases", "category": "data" },
+    { "id": "rag_architecture", "name": "Retrieval-Augmented Generation (RAG)", "category": "ai" },
+    { "id": "fastapi_basics", "name": "FastAPI & REST APIs", "category": "backend" },
+    { "id": "react_basics", "name": "React Fundamentals", "category": "frontend" },
+    { "id": "nextjs", "name": "Next.js App Router", "category": "frontend" },
+    { "id": "fullstack_genai", "name": "Fullstack GenAI Apps", "category": "fullstack" }
+  ],
+  "edges": [
+    { "source": "python_basics", "target": "data_structures" },
+    { "source": "python_basics", "target": "fastapi_basics" },
+    { "source": "python_basics", "target": "machine_learning_basics" },
+    { "source": "linear_algebra", "target": "machine_learning_basics" },
+    { "source": "calculus", "target": "deep_learning" },
+    { "source": "machine_learning_basics", "target": "deep_learning" },
+    { "source": "deep_learning", "target": "nlp_basics" },
+    { "source": "nlp_basics", "target": "transformers" },
+    { "source": "transformers", "target": "llm_finetuning" },
+    { "source": "transformers", "target": "rag_architecture" },
+    { "source": "vector_databases", "target": "rag_architecture" },
+    { "source": "python_basics", "target": "vector_databases" },
+    { "source": "react_basics", "target": "nextjs" },
+    { "source": "fastapi_basics", "target": "fullstack_genai" },
+    { "source": "nextjs", "target": "fullstack_genai" },
+    { "source": "rag_architecture", "target": "fullstack_genai" }
+  ]
+}

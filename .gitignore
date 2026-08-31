@@ -1,0 +1,45 @@
+# Dependencies
+frontend/node_modules/
+node_modules/
+frontend/.pnp
+frontend/.pnp.*
+frontend/.yarn/*
+!frontend/.yarn/patches
+!frontend/.yarn/plugins
+!frontend/.yarn/releases
+!frontend/.yarn/versions
+
+# Next.js Build Output
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+
+# Python Virtual Environments & Caches
+backend/.venv/
+.venv/
+venv/
+env/
+backend/__pycache__/
+*/__pycache__/
+*.py[cod]
+*.class
+backend/.pytest_cache/
+.pytest_cache/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+backend/.env.local
+
+# OS & Temporary Files
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
