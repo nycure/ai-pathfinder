@@ -284,7 +284,7 @@ npm run build
 
 ---
 
-## 👥 Built with ❤️ by Team **The High Council**
+## 👥 Built by Team **The High Council**
 
 | Member Name | Email Contact |
 | :--- | :--- |
