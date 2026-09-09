@@ -284,16 +284,6 @@ npm run build
 
 ---
 
-## 👥 Built by Team **The High Council**
-
-| Member Name | Email Contact |
-| :--- | :--- |
-| **Nitin Yadav** | [ny172418@gmail.com](mailto:ny172418@gmail.com) |
-| **Himanshu Tiwary** | [htiwary09@gmail.com](mailto:htiwary09@gmail.com) |
-| **Kritika Jha** | [kritikajha944@gmail.com](mailto:kritikajha944@gmail.com) |
-| **Anand Prem** | [anandprem2565@gmail.com](mailto:anandprem2565@gmail.com) |
-
----
 
 ## 📄 License
 
