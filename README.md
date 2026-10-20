@@ -4,7 +4,7 @@
 
 **Autonomous, Multi-Agent Personalized Learning Path Recommender & Active Mastery Platform**
 
-*Built  by Team **The High Council***
+
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.3-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
