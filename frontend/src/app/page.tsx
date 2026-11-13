@@ -11,12 +11,12 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { MilestoneFeed } from '@/components/roadmap/MilestoneFeed';
 import { MilestoneStudioPane } from '@/components/roadmap/MilestoneStudioPane';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut, Compass, GitFork, Users, Activity } from 'lucide-react';
+import { LogOut, Compass, GitFork, Activity } from 'lucide-react';
 
 export default function Home() {
   const { roadmap, initializeState, isLoading, reset, setActiveNode } = useRoadmapStore();
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'feed' | 'canvas' | 'cohort' | 'analytics'>('feed');
+  const [activeView, setActiveView] = useState<'feed' | 'canvas' | 'analytics'>('feed');
   const router = useRouter();
   const supabase = createClient();
 
@@ -108,7 +108,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row h-screen overflow-hidden">
-      {/* Column 1: Navigation Sidebar (Desktop fixed, Mobile Top Bar) */}
+      {/* Column 1: Navigation Sidebar (Desktop fixed) */}
       <div className="hidden lg:block shrink-0">
         <AppSidebar
           activeView={activeView}
@@ -129,36 +129,40 @@ export default function Home() {
           <span className="font-extrabold text-sm tracking-tight">PATHFINDER</span>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setActiveView('feed')}
-            className={`p-1.5 rounded-md text-xs ${activeView === 'feed' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+              activeView === 'feed' ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-muted'
+            }`}
           >
-            <Compass className="w-4 h-4" />
+            <Compass className="w-3.5 h-3.5" />
+            <span>Feed</span>
           </button>
           <button
             onClick={() => setActiveView('canvas')}
-            className={`p-1.5 rounded-md text-xs ${activeView === 'canvas' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+              activeView === 'canvas' ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-muted'
+            }`}
           >
-            <GitFork className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setActiveView('cohort')}
-            className={`p-1.5 rounded-md text-xs ${activeView === 'cohort' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
-          >
-            <Users className="w-4 h-4" />
+            <GitFork className="w-3.5 h-3.5" />
+            <span>Graph</span>
           </button>
           <button
             onClick={() => setActiveView('analytics')}
-            className={`p-1.5 rounded-md text-xs ${activeView === 'analytics' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+              activeView === 'analytics' ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-muted'
+            }`}
           >
-            <Activity className="w-4 h-4" />
+            <Activity className="w-3.5 h-3.5" />
+            <span>Analytics</span>
           </button>
           <button
             onClick={handleSignOut}
-            className="p-1.5 rounded-md text-muted-foreground hover:text-destructive"
+            title="Sign out"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-muted transition-colors ml-1"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </header>
@@ -193,13 +197,13 @@ export default function Home() {
         )}
 
         {/* Alternate View: Cohort & Analytics Dashboard */}
-        {(activeView === 'cohort' || activeView === 'analytics') && (
+        {activeView === 'analytics' && (
           <div className="flex-1 p-6 md:p-8 overflow-y-auto">
             <div className="max-w-5xl mx-auto space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                    {activeView === 'cohort' ? 'Study Cohort & Peers' : 'Learning Analytics & Radar'}
+                    Curriculum Analytics & Study Cohort
                   </h1>
                   <p className="text-xs text-muted-foreground mt-1">
                     Path to: {roadmap.target_role} • {roadmap.learner_summary}

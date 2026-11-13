@@ -95,10 +95,12 @@ export function RoadmapCanvas({ readOnlyRoadmap, readOnly = false }: RoadmapCanv
           color="#DFD7CE" 
         />
         <Controls className="bg-card border-border fill-foreground rounded-lg shadow-xs" />
-        <Panel position="top-left" className="bg-card p-4 rounded-xl border border-border shadow-xs">
-          <h2 className="text-base font-bold text-foreground">{roadmap.title}</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">{roadmap.total_estimated_weeks} weeks • {roadmap.total_hours} hours</p>
-        </Panel>
+        {readOnly && (
+          <Panel position="top-left" className="bg-card px-3.5 py-2 rounded-xl border border-border shadow-xs">
+            <h2 className="text-xs font-bold text-foreground">{roadmap.title}</h2>
+            <p className="text-[10px] text-muted-foreground">{roadmap.total_estimated_weeks}w • {roadmap.total_hours}h</p>
+          </Panel>
+        )}
       </ReactFlow>
     </div>
   );

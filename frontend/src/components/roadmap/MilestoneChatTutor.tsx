@@ -3,7 +3,7 @@ import { useRoadmapStore } from '@/store/useRoadmapStore';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface Message {
@@ -89,36 +89,36 @@ export function MilestoneChatTutor() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-h-[70vh] border rounded-lg bg-card overflow-hidden">
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4 pb-4">
+    <div className="flex flex-col flex-1 h-full min-h-[340px] bg-transparent overflow-hidden">
+      <ScrollArea className="flex-1 p-3">
+        <div className="space-y-3 pb-2">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                  <Bot className="w-5 h-5 text-primary" />
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-xs">
+                  <Bot className="w-3.5 h-3.5" />
                 </div>
               )}
               <div 
-                className={`max-w-[85%] rounded-2xl px-4 py-2 ${
+                className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
                   msg.role === 'user' 
-                    ? 'bg-primary text-primary-foreground rounded-tr-sm' 
-                    : 'bg-muted text-foreground rounded-tl-sm'
+                    ? 'bg-primary text-primary-foreground rounded-tr-xs shadow-xs' 
+                    : 'bg-muted/70 text-foreground border border-border/50 rounded-tl-xs'
                 }`}
               >
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                <div className="whitespace-pre-wrap">
                   {msg.content}
                 </div>
               </div>
             </div>
           ))}
           {isStreaming && messages[messages.length - 1].role === 'user' && (
-            <div className="flex gap-3 justify-start">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                <Bot className="w-5 h-5 text-primary" />
+            <div className="flex gap-2.5 justify-start">
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                <Bot className="w-3.5 h-3.5" />
               </div>
-              <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center">
-                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              <div className="bg-muted/70 border border-border/50 rounded-2xl rounded-tl-xs px-3.5 py-2 flex items-center">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
               </div>
             </div>
           )}
@@ -126,17 +126,22 @@ export function MilestoneChatTutor() {
         </div>
       </ScrollArea>
       
-      <div className="p-3 border-t bg-background">
+      <div className="p-2.5 border-t border-border bg-card shrink-0">
         <form onSubmit={handleSend} className="flex gap-2">
           <Input 
             value={input} 
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question..." 
-            className="flex-1"
+            placeholder="Ask your tutor about this topic..." 
+            className="flex-1 h-8 text-xs bg-background border-border rounded-lg"
             disabled={isStreaming}
           />
-          <Button type="submit" size="icon" disabled={!input.trim() || isStreaming}>
-            <Send className="w-4 h-4" />
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={!input.trim() || isStreaming}
+            className="h-8 w-8 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shrink-0"
+          >
+            <Send className="w-3.5 h-3.5" />
           </Button>
         </form>
       </div>

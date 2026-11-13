@@ -59,25 +59,34 @@ export default async function PublicRoadmapPage({ params }: { params: Promise<{ 
 
   return (
     <main className="min-h-screen bg-background text-foreground p-4 md:p-8 flex flex-col items-center">
-      <div className="w-full max-w-7xl flex flex-col gap-8">
-        <header className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              AI Pathfinder
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Public Portfolio: @{username}
-            </p>
+      <div className="w-full max-w-7xl flex flex-col gap-6">
+        <header className="flex justify-between items-center pb-4 border-b border-border/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs tracking-wider">
+              PF
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground tracking-tight font-sans">
+                PATHFINDER
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Public Learner Portfolio: @{username}
+              </p>
+            </div>
           </div>
         </header>
 
-        <div className="bg-card/60 backdrop-blur-xl border border-border p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-2">Path to {data.roadmap.target_role}</h2>
-          <p className="text-muted-foreground">{data.roadmap.learner_summary}</p>
+        <div className="bg-card border border-border p-6 rounded-2xl shadow-xs">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Curriculum Track
+            </span>
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-1">Path to {data.roadmap.target_role}</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">{data.roadmap.learner_summary}</p>
         </div>
         
-        
-        <div className="w-full relative shadow-[0_0_50px_rgba(var(--primary),0.1)] rounded-lg">
+        <div className="w-full rounded-2xl overflow-hidden border border-border shadow-xs">
            <RoadmapCanvas readOnly={true} readOnlyRoadmap={data.roadmap} />
         </div>
       </div>

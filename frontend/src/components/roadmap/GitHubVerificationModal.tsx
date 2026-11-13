@@ -83,28 +83,29 @@ export function GitHubVerificationModal({ isOpen, onClose, nodeId }: GitHubVerif
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleReset()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] bg-card border-border rounded-2xl shadow-xs">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <GitBranch className="w-5 h-5" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <GitBranch className="w-5 h-5 text-foreground" />
             Verify Capstone Project
           </DialogTitle>
-          <DialogDescription>
-            Paste the URL to your public GitHub repository so our AI can evaluate your codebase against this milestone's requirements.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Paste the URL to your public GitHub repository so our AI can evaluate your codebase against this milestone&apos;s requirements.
           </DialogDescription>
         </DialogHeader>
 
         {!result ? (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-3">
             <Input 
               placeholder="https://github.com/username/repo" 
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               disabled={isLoading}
+              className="bg-background border-border rounded-xl text-xs h-10"
             />
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p className="text-xs text-destructive">{error}</p>}
             <Button 
-              className="w-full" 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-semibold py-2.5 shadow-xs" 
               onClick={handleVerify} 
               disabled={!repoUrl.trim() || isLoading}
             >
@@ -119,18 +120,18 @@ export function GitHubVerificationModal({ isOpen, onClose, nodeId }: GitHubVerif
             </Button>
           </div>
         ) : (
-          <div className="space-y-4 py-4">
-            <div className={`p-4 rounded-lg flex items-start gap-3 ${result.approved ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+          <div className="space-y-4 py-3">
+            <div className={`p-4 rounded-xl flex items-start gap-3 ${result.approved ? 'bg-emerald-50 border border-emerald-200 text-emerald-950' : 'bg-muted/60 border border-border text-foreground'}`}>
               {result.approved ? (
-                <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               ) : (
-                <XCircle className="w-6 h-6 text-red-500 shrink-0" />
+                <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
               )}
               <div>
-                <h4 className={`font-semibold ${result.approved ? 'text-green-500' : 'text-red-500'}`}>
+                <h4 className={`text-sm font-bold ${result.approved ? 'text-emerald-800' : 'text-destructive'}`}>
                   {result.approved ? "Project Approved!" : "Needs Revision"}
                 </h4>
-                <p className="text-sm mt-1 leading-relaxed">
+                <p className="text-xs mt-1 leading-relaxed text-muted-foreground">
                   {result.feedback_summary}
                 </p>
               </div>
@@ -138,20 +139,20 @@ export function GitHubVerificationModal({ isOpen, onClose, nodeId }: GitHubVerif
 
             <div className="space-y-3">
               <div>
-                <h5 className="text-sm font-semibold text-green-500 mb-1">Strengths</h5>
-                <ul className="list-disc pl-4 text-sm space-y-1">
+                <h5 className="text-xs font-bold text-emerald-800 mb-1">Strengths</h5>
+                <ul className="list-disc pl-4 text-xs space-y-1 text-muted-foreground">
                   {result.strengths.map((s, i) => <li key={i}>{s}</li>)}
                 </ul>
               </div>
               <div>
-                <h5 className="text-sm font-semibold text-red-500 mb-1">Areas for Improvement</h5>
-                <ul className="list-disc pl-4 text-sm space-y-1">
+                <h5 className="text-xs font-bold text-foreground mb-1">Areas for Improvement</h5>
+                <ul className="list-disc pl-4 text-xs space-y-1 text-muted-foreground">
                   {result.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
                 </ul>
               </div>
             </div>
 
-            <Button className="w-full mt-4" onClick={handleReset} variant={result.approved ? "default" : "outline"}>
+            <Button className="w-full mt-2 rounded-xl text-xs font-semibold" onClick={handleReset} variant={result.approved ? "default" : "outline"}>
               {result.approved ? "Awesome!" : "Try Again Later"}
             </Button>
           </div>

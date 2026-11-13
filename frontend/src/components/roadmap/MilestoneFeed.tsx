@@ -149,6 +149,8 @@ export function MilestoneFeed({ onSelectMilestone }: MilestoneFeedProps) {
             const isCompleted = node.data.status === 'completed';
             const isLocked = node.data.status === 'locked';
 
+            const globalIndex = nodes.findIndex(n => n.id === node.id);
+
             return (
               <div
                 key={node.id}
@@ -160,8 +162,8 @@ export function MilestoneFeed({ onSelectMilestone }: MilestoneFeedProps) {
                 }`}
               >
                 {/* Number Rank */}
-                <span className="text-xs font-semibold text-muted-foreground/80 w-5 shrink-0 pt-0.5">
-                  {index + 1}.
+                <span className="text-xs font-semibold text-muted-foreground/80 w-6 shrink-0 pt-0.5">
+                  {(globalIndex >= 0 ? globalIndex : index) + 1}.
                 </span>
 
                 {/* Main Content */}
@@ -199,10 +201,20 @@ export function MilestoneFeed({ onSelectMilestone }: MilestoneFeedProps) {
                 {/* Action CTA Button */}
                 <div className="shrink-0 pt-0.5">
                   {isCompleted ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-medium border border-emerald-200">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>Done</span>
-                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectMilestone(node.id);
+                      }}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${
+                        isSelected 
+                          ? 'bg-foreground text-background border-foreground font-semibold' 
+                          : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <span>Review</span>
+                    </button>
                   ) : isLocked ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground text-[11px] font-medium">
                       <Lock className="w-3 h-3" />

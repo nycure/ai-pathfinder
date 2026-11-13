@@ -112,36 +112,36 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleReset()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] bg-card border-border rounded-2xl shadow-xs">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Brain className="w-5 h-5 text-primary" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <Brain className="w-5 h-5 text-foreground" />
             Mastery Validation
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs text-muted-foreground">
             {isSubmitted 
               ? `You scored ${score} out of ${questions.length}.`
-              : "Let's make sure you fully grasp these concepts before moving on."}
+              : "Let's verify your conceptual understanding before marking this milestone complete."}
           </DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-4">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-sm">Generating AI Micro-Quiz...</p>
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-3">
+            <Loader2 className="w-7 h-7 animate-spin text-foreground" />
+            <p className="text-xs">Generating AI Micro-Quiz...</p>
           </div>
         ) : error ? (
           <div className="py-4 text-center text-destructive">
-            <p>{error}</p>
+            <p className="text-xs">{error}</p>
             <Button variant="outline" className="mt-4" onClick={handleReset}>Close</Button>
           </div>
         ) : questions.length > 0 && !isSubmitted ? (
-          <div className="py-4 space-y-6">
+          <div className="py-3 space-y-5">
             <div>
-              <p className="text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">
+              <p className="text-[10px] font-semibold text-muted-foreground tracking-wider uppercase mb-1.5">
                 Question {currentQuestionIdx + 1} of {questions.length}
               </p>
-              <h3 className="text-lg font-medium leading-tight">
+              <h3 className="text-base font-semibold leading-snug text-foreground">
                 {questions[currentQuestionIdx].text}
               </h3>
             </div>
@@ -149,45 +149,46 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
             <RadioGroup 
               value={selectedAnswers[currentQuestionIdx]?.toString() || ""}
               onValueChange={handleSelect}
-              className="space-y-3"
+              className="space-y-2.5"
             >
               {questions[currentQuestionIdx].options.map((opt, i) => (
-                <div key={i} className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                <div key={i} className="flex items-center space-x-2.5 border border-border rounded-xl p-3 hover:bg-muted/40 transition-colors bg-background">
                   <RadioGroupItem value={i.toString()} id={`opt-${i}`} />
-                  <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer leading-relaxed font-normal">
+                  <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer text-xs leading-relaxed font-normal text-foreground">
                     {opt}
                   </Label>
                 </div>
               ))}
             </RadioGroup>
 
-            <div className="flex justify-between items-center pt-4">
-              <span className="text-sm text-muted-foreground">
+            <div className="flex justify-between items-center pt-3 border-t border-border/60">
+              <span className="text-[11px] text-muted-foreground">
                 Answer required
               </span>
               <Button 
                 onClick={handleNext}
                 disabled={selectedAnswers[currentQuestionIdx] === undefined}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs px-4 py-2 rounded-lg"
               >
                 {currentQuestionIdx === questions.length - 1 ? 'Submit & Grade' : 'Next Question'}
               </Button>
             </div>
           </div>
         ) : isSubmitted ? (
-          <div className="py-4 space-y-6">
-            <div className={`p-4 rounded-lg flex items-start gap-3 ${score >= 2 ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+          <div className="py-3 space-y-5">
+            <div className={`p-4 rounded-xl flex items-start gap-3 ${score >= 2 ? 'bg-emerald-50 border border-emerald-200 text-emerald-950' : 'bg-muted/60 border border-border text-foreground'}`}>
               {score >= 2 ? (
-                <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               ) : (
-                <XCircle className="w-6 h-6 text-red-500 shrink-0" />
+                <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
               )}
               <div>
-                <h4 className={`font-semibold ${score >= 2 ? 'text-green-500' : 'text-red-500'}`}>
+                <h4 className={`text-sm font-bold ${score >= 2 ? 'text-emerald-800' : 'text-destructive'}`}>
                   {score >= 2 ? "Milestone Mastered!" : "Review Required"}
                 </h4>
-                <p className="text-sm mt-1 leading-relaxed">
+                <p className="text-xs mt-1 leading-relaxed text-muted-foreground">
                   {score >= 2 
-                    ? "Great job! You demonstrated strong conceptual understanding." 
+                    ? "Great work! You demonstrated strong conceptual understanding." 
                     : "You need a score of 2 out of 3 to pass. Please review the resources and try again."}
                 </p>
               </div>

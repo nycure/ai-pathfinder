@@ -4,15 +4,13 @@ import React from 'react';
 import { 
   Compass, 
   GitFork, 
-  Users, 
   Activity, 
-  Settings, 
   LogOut 
 } from 'lucide-react';
 
 interface AppSidebarProps {
-  activeView: 'feed' | 'canvas' | 'cohort' | 'analytics';
-  onSelectView: (view: 'feed' | 'canvas' | 'cohort' | 'analytics') => void;
+  activeView: 'feed' | 'canvas' | 'analytics';
+  onSelectView: (view: 'feed' | 'canvas' | 'analytics') => void;
   userEmail: string | null;
   onSignOut: () => void;
   completedCount?: number;
@@ -20,7 +18,7 @@ interface AppSidebarProps {
 }
 
 interface NavItem {
-  id: 'feed' | 'canvas' | 'cohort' | 'analytics';
+  id: 'feed' | 'canvas' | 'analytics';
   label: string;
   icon: React.ElementType;
   badge?: string;
@@ -38,16 +36,10 @@ export function AppSidebar({
     { id: 'feed', label: 'Curriculum Feed', icon: Compass },
     { id: 'canvas', label: 'Visual Graph', icon: GitFork },
     { 
-      id: 'cohort', 
-      label: 'Study Cohort', 
-      icon: Users,
-      badge: 'Live' 
-    },
-    { 
       id: 'analytics', 
-      label: 'Proficiency Radar', 
+      label: 'Analytics & Cohort', 
       icon: Activity,
-      badge: totalCount > 0 ? `${completedCount}/${totalCount}` : undefined 
+      badge: totalCount > 0 ? `${completedCount}/${totalCount}` : 'Live' 
     },
   ];
 
@@ -100,13 +92,13 @@ export function AppSidebar({
         </nav>
       </div>
 
-      {/* Footer / User Profile & Settings */}
+      {/* Footer / User Profile & Status */}
       <div className="p-3 border-t border-border/60 space-y-2">
-        <div className="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-muted-foreground">
-          <span className="flex items-center gap-2">
-            <Settings className="w-3.5 h-3.5" />
-            <span>Settings</span>
-          </span>
+        <div className="flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+            <span className="font-medium text-[11px]">System Online</span>
+          </div>
           <span className="text-[10px] text-muted-foreground/70">v2.4</span>
         </div>
 
