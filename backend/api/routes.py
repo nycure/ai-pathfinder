@@ -54,6 +54,7 @@ class QuizGenerateRequest(BaseModel):
     node_id: str
     profile: LearnerProfile
     roadmap: RoadmapResponse
+    force_refresh: bool = False
 
 class GitHubVerifyRequest(BaseModel):
     repo_url: str
@@ -215,7 +216,13 @@ async def generate_quiz(
     user_id: str = Depends(get_current_user)
 ):
     try:
-        return quiz_agent.generate_quiz(request.node_id, request.profile, request.roadmap)
+        return quiz_agent.generate_quiz(
+            request.node_id, 
+            request.profile, 
+            request.roadmap,
+            force_refresh=request.force_refresh,
+            user_id=user_id
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -1,15 +1,34 @@
 from services.llm_client import LLMClient
+from services.cache_service import CacheService
 from models.schemas import LearnerProfile, RoadmapResponse, QuizResponse
 
 class QuizAgent:
     def __init__(self, llm_client: LLMClient = None):
         self.llm_client = llm_client or LLMClient()
+        self.cache = CacheService()
 
-    def generate_quiz(self, node_id: str, profile: LearnerProfile, roadmap: RoadmapResponse) -> QuizResponse:
+    def generate_quiz(
+        self, 
+        node_id: str, 
+        profile: LearnerProfile, 
+        roadmap: RoadmapResponse, 
+        force_refresh: bool = False,
+        user_id: str = None
+    ) -> QuizResponse:
         active_node = next((n for n in roadmap.nodes if n.id == node_id), None)
         if not active_node:
             raise ValueError("Node not found in roadmap.")
 
+        cache_key_kwargs = {"node_id": node_id, "target_role": profile.target_role}
+        
+        # Check cache if not explicitly forcing a fresh retake
+        if not force_refresh:
+            cached_quiz_str = self.cache.get("quiz_v2", **cache_key_kwargs)
+            if cached_quiz_str:
+                print(f"[CacheService] Cache HIT for quiz_v2 (node: {node_id})")
+                return QuizResponse.model_validate_json(cached_quiz_str)
+
+        print(f"[CacheService] Generating quiz via AI (node: {node_id}, force_refresh={force_refresh})")
         system_instruction = (
             "You are an expert technical AI tutor. Your goal is to evaluate if a learner has genuinely mastered a specific topic. "
             "Generate exactly 3 multiple-choice questions that test their conceptual understanding. "
@@ -44,5 +63,8 @@ Formatting Requirements:
             response_schema=QuizResponse,
             system_instruction=system_instruction
         )
+        
+        # Save to cache (TTL: 24 hours)
+        self.cache.set("quiz_v2", response_str, ttl_seconds=86400, **cache_key_kwargs)
         
         return QuizResponse.model_validate_json(response_str)

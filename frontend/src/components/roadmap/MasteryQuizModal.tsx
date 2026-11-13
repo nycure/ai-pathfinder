@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Loader2, Brain, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, Brain, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 
 interface MasteryQuizModalProps {
   isOpen: boolean;
@@ -146,6 +146,17 @@ function FormattedQuizText({ text }: { text: string }) {
   return <div>{elements}</div>;
 }
 
+interface QuizSession {
+  questions: QuizQuestion[];
+  currentQuestionIdx: number;
+  selectedAnswers: Record<number, number>;
+  isSubmitted: boolean;
+  score: number;
+}
+
+// In-memory cache preserving active quiz sessions per milestone node
+const quizSessionCache: Record<string, QuizSession> = {};
+
 export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalProps) {
   const { profile, roadmap, completeNode } = useRoadmapStore();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -157,15 +168,27 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
 
-  // Fetch quiz when modal opens
+  // Restore from cache or fetch when modal opens
   useEffect(() => {
-    if (isOpen && questions.length === 0) {
-      generateQuiz();
-    }
-  }, [isOpen]);
+    if (!isOpen || !nodeId) return;
 
-  const generateQuiz = async () => {
-    if (!profile || !roadmap) return;
+    const cached = quizSessionCache[nodeId];
+    if (cached && cached.questions.length > 0) {
+      // Instant restore from cache without AI latency!
+      setQuestions(cached.questions);
+      setCurrentQuestionIdx(cached.currentQuestionIdx);
+      setSelectedAnswers(cached.selectedAnswers);
+      setIsSubmitted(cached.isSubmitted);
+      setScore(cached.score);
+      setIsLoading(false);
+      setError('');
+    } else {
+      generateQuiz(false);
+    }
+  }, [isOpen, nodeId]);
+
+  const generateQuiz = async (forceRefresh: boolean = false) => {
+    if (!profile || !roadmap || !nodeId) return;
     setIsLoading(true);
     setError('');
     
@@ -182,7 +205,8 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
         body: JSON.stringify({
           node_id: nodeId,
           profile,
-          roadmap
+          roadmap,
+          force_refresh: forceRefresh
         })
       });
 
@@ -190,6 +214,19 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
 
       const data = await response.json();
       setQuestions(data.questions);
+      setCurrentQuestionIdx(0);
+      setSelectedAnswers({});
+      setIsSubmitted(false);
+      setScore(0);
+
+      // Save to node session cache
+      quizSessionCache[nodeId] = {
+        questions: data.questions,
+        currentQuestionIdx: 0,
+        selectedAnswers: {},
+        isSubmitted: false,
+        score: 0,
+      };
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -199,12 +236,20 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
 
   const handleSelect = (val: string) => {
     if (isSubmitted) return;
-    setSelectedAnswers(prev => ({ ...prev, [currentQuestionIdx]: parseInt(val) }));
+    const newAnswers = { ...selectedAnswers, [currentQuestionIdx]: parseInt(val) };
+    setSelectedAnswers(newAnswers);
+    if (nodeId && quizSessionCache[nodeId]) {
+      quizSessionCache[nodeId].selectedAnswers = newAnswers;
+    }
   };
 
   const handleNext = () => {
     if (currentQuestionIdx < questions.length - 1) {
-      setCurrentQuestionIdx(prev => prev + 1);
+      const nextIdx = currentQuestionIdx + 1;
+      setCurrentQuestionIdx(nextIdx);
+      if (nodeId && quizSessionCache[nodeId]) {
+        quizSessionCache[nodeId].currentQuestionIdx = nextIdx;
+      }
     } else {
       // Calculate score
       let correct = 0;
@@ -213,6 +258,10 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
       });
       setScore(correct);
       setIsSubmitted(true);
+      if (nodeId && quizSessionCache[nodeId]) {
+        quizSessionCache[nodeId].isSubmitted = true;
+        quizSessionCache[nodeId].score = correct;
+      }
 
       // If passing (>= 2/3), mark as completed
       if (correct >= 2) {
@@ -221,17 +270,27 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
     }
   };
 
-  const handleReset = () => {
+  const handleRetakeQuiz = async () => {
+    if (nodeId) {
+      delete quizSessionCache[nodeId];
+    }
     setQuestions([]);
     setCurrentQuestionIdx(0);
     setSelectedAnswers({});
     setIsSubmitted(false);
     setScore(0);
+    await generateQuiz(true);
+  };
+
+  const handleModalClose = () => {
+    if (isSubmitted && score >= 2 && nodeId) {
+      delete quizSessionCache[nodeId];
+    }
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleReset()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleModalClose()}>
       <DialogContent className="sm:max-w-[580px] max-h-[92vh] overflow-y-auto bg-card border-border rounded-2xl shadow-xs">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
@@ -253,7 +312,7 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
         ) : error ? (
           <div className="py-4 text-center text-destructive">
             <p className="text-xs">{error}</p>
-            <Button variant="outline" className="mt-4" onClick={handleReset}>Close</Button>
+            <Button variant="outline" className="mt-4" onClick={handleModalClose}>Close</Button>
           </div>
         ) : questions.length > 0 && !isSubmitted ? (
           <div className="py-3 space-y-5">
@@ -335,9 +394,28 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
               ))}
             </div>
 
-            <Button className="w-full mt-4" onClick={handleReset}>
-              {score >= 2 ? "Continue Roadmap" : "Review Concepts"}
-            </Button>
+            {score >= 2 ? (
+              <Button className="w-full mt-4" onClick={handleModalClose}>
+                Continue Roadmap
+              </Button>
+            ) : (
+              <div className="flex gap-2.5 mt-4">
+                <Button 
+                  onClick={handleRetakeQuiz}
+                  className="flex-1 bg-foreground text-background hover:bg-foreground/90 text-xs py-2 rounded-lg flex items-center justify-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Retake Quiz (New Questions)</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleModalClose}
+                  className="px-4 text-xs"
+                >
+                  Review Materials
+                </Button>
+              </div>
+            )}
           </div>
         ) : null}
       </DialogContent>
