@@ -17,8 +17,16 @@ export default function Home() {
   const { roadmap, initializeState, isLoading, reset, setActiveNode } = useRoadmapStore();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'feed' | 'canvas' | 'analytics'>('feed');
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -216,10 +224,8 @@ export default function Home() {
         )}
       </div>
 
-      {/* Slide-out drawer for Mobile fallback */}
-      <div className="lg:hidden">
-        <NodeInspectorDrawer />
-      </div>
+      {/* Slide-out drawer for Mobile fallback only */}
+      {isMobile && <NodeInspectorDrawer />}
     </div>
   );
 }
