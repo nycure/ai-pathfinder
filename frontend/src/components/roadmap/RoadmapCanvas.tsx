@@ -8,7 +8,8 @@ import {
   useNodesState, 
   useEdgesState, 
   BackgroundVariant,
-  Panel
+  Panel,
+  MarkerType
 } from '@xyflow/react';
 
 import { useRoadmapStore } from '@/store/useRoadmapStore';
@@ -42,14 +43,73 @@ export function RoadmapCanvas({ readOnlyRoadmap, readOnly = false }: RoadmapCanv
 
   // Update flow state when global roadmap changes
   React.useEffect(() => {
-    if (roadmap) {
-      setNodes(roadmap.nodes);
-      // Ensure all edges map to our custom type and have animated properties if needed
-      setEdges(roadmap.edges.map((e: any) => ({
-        ...e,
-        type: 'prerequisiteEdge',
-        animated: true // simple default for now
-      })));
+    if (roadmap && roadmap.nodes) {
+      // 1. Layout Normalizer: Expand older 300px/150px coordinates to 420px/180px
+      const xPositions = Array.from(new Set(roadmap.nodes.map((n: any) => n.position?.x ?? 0))).sort((a: any, b: any) => a - b) as number[];
+      let minPositiveDeltaX = Infinity;
+      for (let i = 1; i < xPositions.length; i++) {
+        const delta = xPositions[i] - xPositions[i - 1];
+        if (delta > 20 && delta < minPositiveDeltaX) {
+          minPositiveDeltaX = delta;
+        }
+      }
+
+      const shouldScale = minPositiveDeltaX > 20 && minPositiveDeltaX < 380;
+      const scaleX = shouldScale ? 420 / minPositiveDeltaX : 1.0;
+      const scaleY = shouldScale ? 1.2 : 1.0;
+
+      const normalizedNodes = roadmap.nodes.map((n: any) => ({
+        ...n,
+        position: {
+          x: Math.round((n.position?.x ?? 0) * scaleX),
+          y: Math.round((n.position?.y ?? 0) * scaleY),
+        },
+      }));
+      setNodes(normalizedNodes);
+
+      // 2. Intelligent, State-Aware Edge Mapping
+      const nodeMap = new Map(roadmap.nodes.map((n: any) => [n.id, n]));
+
+      setEdges(
+        (roadmap.edges || []).map((e: any) => {
+          const sourceNode: any = nodeMap.get(e.source);
+          const targetNode: any = nodeMap.get(e.target);
+
+          const sourceStatus = sourceNode?.data?.status;
+          const targetStatus = targetNode?.data?.status;
+
+          // Prerequisite statuses
+          const isMastered = sourceStatus === 'completed' && targetStatus === 'completed';
+          // Active flow: points to the currently active/available milestone
+          const isActiveFlow = targetStatus === 'available';
+
+          let strokeColor = '#C8C0B5'; // Inactive/Locked warm gray
+          if (isActiveFlow) {
+            strokeColor = '#121212';   // Active high-contrast dark
+          } else if (isMastered) {
+            strokeColor = '#059669';   // Mastered emerald
+          }
+
+          return {
+            ...e,
+            type: 'prerequisiteEdge',
+            animated: isActiveFlow,
+            data: {
+              strokeColor,
+              isActiveFlow,
+              isMastered,
+              targetStatus: targetStatus || 'locked',
+              sourceStatus: sourceStatus || 'locked',
+            },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 14,
+              height: 14,
+              color: strokeColor,
+            },
+          };
+        })
+      );
     }
   }, [roadmap, setNodes, setEdges]);
 
@@ -81,10 +141,11 @@ export function RoadmapCanvas({ readOnlyRoadmap, readOnly = false }: RoadmapCanv
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
+        fitViewOptions={{ padding: 0.2 }}
         nodesDraggable={!readOnly}
         nodesConnectable={false}
         elementsSelectable={!readOnly}
-        minZoom={0.2}
+        minZoom={0.15}
         maxZoom={1.5}
         className="bg-background"
       >

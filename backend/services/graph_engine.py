@@ -115,8 +115,8 @@ class SkillGraphEngine:
              # Fallback if there are cycles (shouldn't happen with our checks)
              generations = [skills_ordered]
 
-        x_spacing = 300
-        y_spacing = 150
+        x_spacing = 420
+        y_spacing = 180
         
         for x_idx, generation in enumerate(generations):
             for y_idx, node_id in enumerate(generation):
