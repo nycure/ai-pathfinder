@@ -26,6 +26,126 @@ interface QuizQuestion {
   explanation: string;
 }
 
+function formatCodeIfNeeded(code: string): string {
+  const cleaned = code.trim();
+  if (cleaned.includes('\n')) {
+    return cleaned;
+  }
+  let formatted = '';
+  let indent = 0;
+  const tokens = cleaned.split(/([{};])/g);
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i].trim();
+    if (!token) continue;
+    if (token === '{') {
+      formatted += ' {\n' + '  '.repeat(++indent);
+    } else if (token === '}') {
+      indent = Math.max(0, indent - 1);
+      formatted += '\n' + '  '.repeat(indent) + '}';
+    } else if (token === ';') {
+      formatted += ';\n' + '  '.repeat(indent);
+    } else {
+      if (formatted.length > 0 && !formatted.endsWith('\n') && !formatted.endsWith('  ')) {
+        formatted += ' ';
+      }
+      formatted += token;
+    }
+  }
+  return formatted.trim();
+}
+
+function FormattedInlineText({ text }: { text: string }) {
+  if (!text) return null;
+  const parts = text.split(/(`[^`]+`)/g);
+  return (
+    <span>
+      {parts.map((part, i) => {
+        if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
+          return (
+            <code 
+              key={i} 
+              className="font-mono text-[11px] bg-muted/80 text-foreground px-1.5 py-0.5 rounded border border-border/60 mx-0.5"
+            >
+              {part.slice(1, -1)}
+            </code>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </span>
+  );
+}
+
+function FormattedQuizText({ text }: { text: string }) {
+  if (!text) return null;
+
+  const codeBlockRegex = /```(?:([a-zA-Z0-9_#+-]+)\s*)?\n?([\s\S]*?)```/g;
+  const elements: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = codeBlockRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      const prose = text.slice(lastIndex, match.index).trim();
+      if (prose) {
+        elements.push(
+          <div key={`prose-${lastIndex}`} className="text-sm font-semibold leading-relaxed text-foreground mb-2">
+            <FormattedInlineText text={prose} />
+          </div>
+        );
+      }
+    }
+
+    const lang = (match[1] || 'code').trim();
+    const rawCode = match[2] || '';
+    const formattedCode = formatCodeIfNeeded(rawCode);
+
+    elements.push(
+      <div 
+        key={`code-${match.index}`} 
+        className="my-3 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-100 overflow-hidden shadow-xs"
+      >
+        <div className="px-3.5 py-2 border-b border-neutral-800 bg-neutral-950/80 flex items-center justify-between text-[10px] font-mono text-neutral-400">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-neutral-700"></span>
+            <span className="w-2 h-2 rounded-full bg-neutral-700"></span>
+            <span className="w-2 h-2 rounded-full bg-neutral-700"></span>
+            <span className="ml-1 uppercase tracking-wider font-semibold text-neutral-300">
+              {lang}
+            </span>
+          </div>
+        </div>
+        <pre className="p-3.5 font-mono text-xs text-neutral-200 overflow-x-auto leading-relaxed whitespace-pre selection:bg-neutral-800">
+          <code>{formattedCode}</code>
+        </pre>
+      </div>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    const remaining = text.slice(lastIndex).trim();
+    if (remaining) {
+      elements.push(
+        <div key={`prose-end`} className="text-sm font-semibold leading-relaxed text-foreground mt-2">
+          <FormattedInlineText text={remaining} />
+        </div>
+      );
+    }
+  }
+
+  if (elements.length === 0) {
+    return (
+      <div className="text-sm font-semibold leading-relaxed text-foreground">
+        <FormattedInlineText text={text} />
+      </div>
+    );
+  }
+
+  return <div>{elements}</div>;
+}
+
 export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalProps) {
   const { profile, roadmap, completeNode } = useRoadmapStore();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -112,7 +232,7 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleReset()}>
-      <DialogContent className="sm:max-w-[500px] bg-card border-border rounded-2xl shadow-xs">
+      <DialogContent className="sm:max-w-[580px] max-h-[92vh] overflow-y-auto bg-card border-border rounded-2xl shadow-xs">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Brain className="w-5 h-5 text-foreground" />
@@ -141,9 +261,9 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
               <p className="text-[10px] font-semibold text-muted-foreground tracking-wider uppercase mb-1.5">
                 Question {currentQuestionIdx + 1} of {questions.length}
               </p>
-              <h3 className="text-base font-semibold leading-snug text-foreground">
-                {questions[currentQuestionIdx].text}
-              </h3>
+              <div className="text-foreground">
+                <FormattedQuizText text={questions[currentQuestionIdx].text} />
+              </div>
             </div>
 
             <RadioGroup 
@@ -155,7 +275,7 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
                 <div key={i} className="flex items-center space-x-2.5 border border-border rounded-xl p-3 hover:bg-muted/40 transition-colors bg-background">
                   <RadioGroupItem value={i.toString()} id={`opt-${i}`} />
                   <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer text-xs leading-relaxed font-normal text-foreground">
-                    {opt}
+                    <FormattedInlineText text={opt} />
                   </Label>
                 </div>
               ))}
@@ -196,15 +316,21 @@ export function MasteryQuizModal({ isOpen, onClose, nodeId }: MasteryQuizModalPr
 
             <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
               {questions.map((q, idx) => (
-                <div key={idx} className="text-sm space-y-1 pb-4 border-b last:border-0">
-                  <p className="font-medium">{q.text}</p>
-                  <p className="text-muted-foreground">Your answer: {q.options[selectedAnswers[idx]]}</p>
-                  <p className={selectedAnswers[idx] === q.correct_option_index ? 'text-green-500' : 'text-red-500'}>
-                    {selectedAnswers[idx] === q.correct_option_index ? 'Correct!' : `Incorrect. Correct answer: ${q.options[q.correct_option_index]}`}
-                  </p>
-                  <p className="bg-muted/50 p-2 rounded text-muted-foreground mt-2 text-xs">
-                    {q.explanation}
-                  </p>
+                <div key={idx} className="space-y-2 pb-4 border-b border-border/60 last:border-0">
+                  <div className="font-medium text-foreground">
+                    <FormattedQuizText text={q.text} />
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Your answer: <FormattedInlineText text={q.options[selectedAnswers[idx]] || 'None'} />
+                  </div>
+                  <div className={`text-xs font-semibold ${selectedAnswers[idx] === q.correct_option_index ? 'text-emerald-700' : 'text-rose-700'}`}>
+                    {selectedAnswers[idx] === q.correct_option_index 
+                      ? '✓ Correct' 
+                      : <span>✗ Incorrect. Correct: <FormattedInlineText text={q.options[q.correct_option_index]} /></span>}
+                  </div>
+                  <div className="bg-muted/50 p-2.5 rounded-lg text-muted-foreground mt-2 text-xs leading-relaxed">
+                    <FormattedQuizText text={q.explanation} />
+                  </div>
                 </div>
               ))}
             </div>
