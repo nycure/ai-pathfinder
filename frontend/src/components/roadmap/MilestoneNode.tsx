@@ -14,12 +14,12 @@ export function MilestoneNode({ data, selected }: NodeProps<RoadmapNode>) {
 
   return (
     <div className="relative group min-w-[260px]">
-      <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-foreground border border-card" />
+      <Handle type="target" position={Position.Left} className="w-2.5 h-2.5 bg-foreground border border-card" />
       
       <Card className={`
         bg-card border-border transition-all duration-200 rounded-xl shadow-xs
-        ${selected ? 'ring-2 ring-foreground shadow-sm border-foreground' : 'hover:border-foreground/40'}
-        ${data.status === 'locked' ? 'opacity-60 bg-muted/30' : 'opacity-100'}
+        ${selected ? 'ring-2 ring-foreground shadow-sm border-foreground' : 'hover:border-foreground/50'}
+        ${data.status === 'locked' ? 'border-border/70' : 'border-border'}
       `}>
         <CardHeader className="p-4 pb-2">
           <div className="flex justify-between items-start gap-3">
@@ -54,7 +54,7 @@ export function MilestoneNode({ data, selected }: NodeProps<RoadmapNode>) {
         </CardContent>
       </Card>
 
-      <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-foreground border border-card" />
+      <Handle type="source" position={Position.Right} className="w-2.5 h-2.5 bg-foreground border border-card" />
     </div>
   );
 }

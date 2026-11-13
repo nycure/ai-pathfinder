@@ -27,9 +27,8 @@ export function PrerequisiteEdge({
       markerEnd={markerEnd} 
       style={{ 
         ...style, 
-        strokeWidth: animated ? 2 : 1.5, 
-        stroke: animated ? '#121212' : '#DFD7CE',
-        animation: animated ? 'dash 1.5s linear infinite' : 'none',
+        strokeWidth: 1.5, 
+        stroke: animated ? '#121212' : '#B8AEA2',
         strokeDasharray: animated ? '4,4' : 'none'
       }} 
     />
