@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from services.llm_client import LLMClient
 from agents.roadmap_agent import RoadmapAgent
 from models.schemas import (
-    LearnerProfile, RoadmapResponse, AdaptationRequest, AdaptationResponse, SkillLevel
+    LearnerProfile, RoadmapResponse, AdaptationRequest, AdaptationResponse, SkillLevel, NodeStatus
 )
 from database.client import supabase
 from datetime import datetime, timezone
@@ -31,27 +31,57 @@ class AdaptationAgent:
         updated_skills = dict(current_profile.skills)
         updated_target_role = current_profile.target_role
         
-        # 1. Handle node completion
+        # 1. Handle milestone completion (in-place progression)
         if request.completed_node_id:
-            node = next((n for n in current_roadmap.nodes if n.id == request.completed_node_id), None)
-            if node:
-                for skill in node.data.skills_acquired:
-                    # FIX: Use SkillLevel enum instead of raw string
+            completed_node = next((n for n in current_roadmap.nodes if n.id == request.completed_node_id), None)
+            if completed_node:
+                # Mark target node as completed
+                completed_node.data.status = NodeStatus.COMPLETED
+                for skill in completed_node.data.skills_acquired:
                     updated_skills[skill] = SkillLevel.BEGINNER
-                changes_summary.append(f"Marked '{node.data.label}' as completed. Added skills to profile.")
+                changes_summary.append(f"Marked '{completed_node.data.label}' as completed. Added skills to profile.")
                 
+                # Topological Unlock: Scan locked nodes and unlock them if all incoming prerequisites are completed
+                node_map = {n.id: n for n in current_roadmap.nodes}
+                for other_node in current_roadmap.nodes:
+                    if other_node.data.status == NodeStatus.LOCKED:
+                        incoming_prereqs = [e.source for e in current_roadmap.edges if e.target == other_node.id]
+                        if incoming_prereqs and all(
+                            node_map.get(pid) and node_map[pid].data.status == NodeStatus.COMPLETED 
+                            for pid in incoming_prereqs
+                        ):
+                            other_node.data.status = NodeStatus.AVAILABLE
+                            changes_summary.append(f"Unlocked downstream milestone '{other_node.data.label}'.")
+
+                # Persist milestone progress and updated graph payload to Supabase
                 if user_id and supabase:
                     try:
+                        # 1. Upsert milestone progress record
                         supabase.table("milestone_progress").upsert({
                             "roadmap_id": current_roadmap.roadmap_id,
-                            "node_id": node.id,
+                            "node_id": completed_node.id,
                             "status": "completed",
                             "completed_at": datetime.now(timezone.utc).isoformat()
                         }, on_conflict="roadmap_id,node_id").execute()
+
+                        # 2. Update existing active roadmap with updated node statuses in graph_payload
+                        updated_payload = {
+                            "nodes": [n.model_dump() for n in current_roadmap.nodes],
+                            "edges": [e.model_dump() for e in current_roadmap.edges]
+                        }
+                        supabase.table("roadmaps").update({
+                            "graph_payload": updated_payload
+                        }).eq("id", current_roadmap.roadmap_id).execute()
+
+                        # 3. Update learner profile skills
+                        supabase.table("learner_profiles").upsert({
+                            "user_id": user_id,
+                            "skills": {k: v.value if hasattr(v, 'value') else str(v) for k, v in updated_skills.items()}
+                        }, on_conflict="user_id").execute()
                     except Exception as e:
-                        print(f"[Supabase Error] Failed to update milestone: {e}")
+                        print(f"[Supabase Error] Failed to persist milestone completion: {e}")
                 
-        # 2. Handle textual feedback
+        # 2. Handle qualitative feedback (Career Goal Pivot / Re-generation)
         if request.feedback:
             prompt = (
                 f"Current Target Role: {current_profile.target_role}\n"
@@ -73,20 +103,29 @@ class AdaptationAgent:
                 )
                 updated_target_role = update_data.new_target_role
 
-        # FIX: Use model_copy to safely produce an updated profile without mutating the original
+            updated_profile = current_profile.model_copy(update={
+                "skills": updated_skills,
+                "target_role": updated_target_role
+            })
+
+            new_roadmap = self.roadmap_agent.generate_roadmap(updated_profile, user_id)
+            return AdaptationResponse(
+                updated_roadmap=new_roadmap,
+                updated_profile=updated_profile,
+                changes_made=" ".join(changes_summary)
+            )
+
+        # If ONLY node completion occurred (no qualitative feedback), return current_roadmap updated in-place!
         updated_profile = current_profile.model_copy(update={
             "skills": updated_skills,
             "target_role": updated_target_role
         })
-                
-        # 3. Regenerate Roadmap with the updated profile
+
         if not changes_summary:
             changes_summary.append("No changes detected. Roadmap refreshed.")
             
-        new_roadmap = self.roadmap_agent.generate_roadmap(updated_profile, user_id)
-        
         return AdaptationResponse(
-            updated_roadmap=new_roadmap,
+            updated_roadmap=current_roadmap,
             updated_profile=updated_profile,
             changes_made=" ".join(changes_summary)
         )

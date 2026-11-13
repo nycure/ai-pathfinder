@@ -170,5 +170,7 @@ def test_adaptation_agent_mocked_completion():
     res = agent.adapt_path(request, profile, initial_roadmap)
     assert "python_basics" in res.updated_profile.skills
     assert "Marked 'Python Fundamentals' as completed" in res.changes_made
-    mock_roadmap_agent.generate_roadmap.assert_called_once()
+    # In-place completion preserves existing curriculum without re-generating from scratch
+    mock_roadmap_agent.generate_roadmap.assert_not_called()
+    assert res.updated_roadmap.nodes[0].data.status == NodeStatus.COMPLETED
 

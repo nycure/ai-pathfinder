@@ -130,6 +130,29 @@ async def get_active_roadmap(user_id: str = Depends(get_current_user)):
             skills=profile_data["skills"]
         )
         
+        # Fetch completed milestones from milestone_progress table
+        progress_res = supabase.table("milestone_progress").select("node_id, status").eq("roadmap_id", roadmap_data["id"]).eq("status", "completed").execute()
+        completed_node_ids = {row["node_id"] for row in (progress_res.data or [])}
+
+        raw_nodes = roadmap_data["graph_payload"]["nodes"]
+        raw_edges = roadmap_data["graph_payload"]["edges"]
+
+        # Reconcile node statuses with milestone_progress
+        node_map = {n["id"]: n for n in raw_nodes}
+        for n in raw_nodes:
+            if n["id"] in completed_node_ids:
+                n["data"]["status"] = "completed"
+
+        # Check for unlocked nodes whose prerequisites are all completed
+        for n in raw_nodes:
+            if n["data"]["status"] == "locked":
+                incoming_prereqs = [e["source"] for e in raw_edges if e["target"] == n["id"]]
+                if incoming_prereqs and all(
+                    node_map.get(pid) and node_map[pid]["data"]["status"] == "completed"
+                    for pid in incoming_prereqs
+                ):
+                    n["data"]["status"] = "available"
+
         # Reconstruct Roadmap
         roadmap = RoadmapResponse(
             roadmap_id=roadmap_data["id"],
@@ -139,8 +162,8 @@ async def get_active_roadmap(user_id: str = Depends(get_current_user)):
             total_hours=roadmap_data["total_hours"],
             learner_summary=roadmap_data["learner_summary"],
             skill_gap_summary=roadmap_data["skill_gap_summary"],
-            nodes=roadmap_data["graph_payload"]["nodes"],
-            edges=roadmap_data["graph_payload"]["edges"]
+            nodes=raw_nodes,
+            edges=raw_edges
         )
         
         return GenerateRoadmapResponse(profile=profile, roadmap=roadmap)
@@ -298,6 +321,29 @@ async def get_public_roadmap(username: str):
             skills=profile_data["skills"]
         )
         
+        # Fetch completed milestones from milestone_progress table
+        progress_res = supabase.table("milestone_progress").select("node_id, status").eq("roadmap_id", roadmap_data["id"]).eq("status", "completed").execute()
+        completed_node_ids = {row["node_id"] for row in (progress_res.data or [])}
+
+        raw_nodes = roadmap_data["graph_payload"]["nodes"]
+        raw_edges = roadmap_data["graph_payload"]["edges"]
+
+        # Reconcile node statuses with milestone_progress
+        node_map = {n["id"]: n for n in raw_nodes}
+        for n in raw_nodes:
+            if n["id"] in completed_node_ids:
+                n["data"]["status"] = "completed"
+
+        # Check for unlocked nodes whose prerequisites are all completed
+        for n in raw_nodes:
+            if n["data"]["status"] == "locked":
+                incoming_prereqs = [e["source"] for e in raw_edges if e["target"] == n["id"]]
+                if incoming_prereqs and all(
+                    node_map.get(pid) and node_map[pid]["data"]["status"] == "completed"
+                    for pid in incoming_prereqs
+                ):
+                    n["data"]["status"] = "available"
+
         # Reconstruct Roadmap
         roadmap = RoadmapResponse(
             roadmap_id=roadmap_data["id"],
@@ -307,8 +353,8 @@ async def get_public_roadmap(username: str):
             total_hours=roadmap_data["total_hours"],
             learner_summary=roadmap_data["learner_summary"],
             skill_gap_summary=roadmap_data["skill_gap_summary"],
-            nodes=roadmap_data["graph_payload"]["nodes"],
-            edges=roadmap_data["graph_payload"]["edges"]
+            nodes=raw_nodes,
+            edges=raw_edges
         )
         
         return GenerateRoadmapResponse(profile=profile, roadmap=roadmap)
