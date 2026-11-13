@@ -81,10 +81,10 @@ export function NodeInspectorDrawer() {
 
             <TabsContent value="overview">
               {/* Explainable AI (XAI) Section */}
-              <Card className="mb-6 border-accent/50 bg-accent/5 shadow-[0_0_20px_rgba(var(--accent),0.1)]">
+              <Card className="mb-6 border-border bg-card shadow-xs rounded-xl">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold flex items-center gap-2 text-accent">
-                    <BrainCircuit className="w-4 h-4" />
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                    <BrainCircuit className="w-4 h-4 text-foreground" />
                     Why was this recommended for you?
                   </CardTitle>
                 </CardHeader>
@@ -133,14 +133,14 @@ export function NodeInspectorDrawer() {
                     rel="noreferrer"
                     className="block group"
                   >
-                    <Card className="bg-primary/5 border-primary/20 hover:border-primary/50 hover:bg-primary/10 transition-colors">
+                    <Card className="bg-card border-border hover:bg-muted/40 transition-colors rounded-xl shadow-xs">
                       <CardHeader className="p-4 pb-2">
                         <div className="flex justify-between items-start gap-2">
-                          <CardTitle className="text-base group-hover:text-primary transition-colors flex items-center gap-2">
-                            <PlayCircle className="w-4 h-4" />
+                          <CardTitle className="text-base group-hover:underline text-foreground transition-colors flex items-center gap-2">
+                            <PlayCircle className="w-4 h-4 text-foreground" />
                             {data.primary_resource.title}
                           </CardTitle>
-                          <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
+                          <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground shrink-0" />
                         </div>
                         <CardDescription className="text-xs flex items-center gap-2 mt-1">
                           <span className="font-medium text-foreground">{data.primary_resource.provider}</span>

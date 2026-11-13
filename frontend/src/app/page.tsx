@@ -7,11 +7,16 @@ import { GoalChat } from '@/components/chat/GoalChat';
 import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
 import { LearnerDashboard } from '@/components/dashboard/LearnerDashboard';
 import { NodeInspectorDrawer } from '@/components/roadmap/NodeInspectorDrawer';
+import { AppSidebar } from '@/components/layout/AppSidebar';
+import { MilestoneFeed } from '@/components/roadmap/MilestoneFeed';
+import { MilestoneStudioPane } from '@/components/roadmap/MilestoneStudioPane';
 import { createClient } from '@/lib/supabase/client';
+import { LogOut, Compass, GitFork, Users, Activity } from 'lucide-react';
 
 export default function Home() {
-  const { roadmap, initializeState, isLoading, reset } = useRoadmapStore();
+  const { roadmap, initializeState, isLoading, reset, setActiveNode } = useRoadmapStore();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'feed' | 'canvas' | 'cohort' | 'analytics'>('feed');
   const router = useRouter();
   const supabase = createClient();
 
@@ -35,82 +40,182 @@ export default function Home() {
 
   if (isLoading && !roadmap) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-muted-foreground">Loading your learning space...</p>
+      <main className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-9 h-9 border-3 border-border border-t-foreground rounded-full animate-spin"></div>
+          <p className="text-xs font-medium text-muted-foreground">Loading your workspace...</p>
         </div>
       </main>
     );
   }
 
-  return (
-    <main className="min-h-screen bg-background text-foreground p-4 md:p-8 flex flex-col items-center">
-      
-      {!roadmap ? (
-        // Initial state: Only show Goal Chat vertically centered
-        <div className="flex-1 flex flex-col justify-center items-center w-full max-w-4xl relative">
-          <div className="w-full flex justify-end items-center gap-3 mb-2">
+  // Initial State: Goal Creation Prompt
+  if (!roadmap) {
+    return (
+      <main className="min-h-screen bg-background text-foreground flex flex-col justify-between p-6 md:p-12">
+        {/* Top Header */}
+        <header className="w-full max-w-4xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs tracking-wider">
+              PF
+            </div>
+            <span className="font-extrabold tracking-tight text-lg text-foreground font-sans">
+              PATHFINDER
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
             {userEmail && (
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                {userEmail}
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card border border-border text-xs text-foreground font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                <span>{userEmail}</span>
               </div>
             )}
             <button 
               onClick={handleSignOut}
-              className="text-xs px-3 py-1.5 rounded-md bg-secondary/50 hover:bg-destructive/20 hover:text-destructive text-muted-foreground transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               Sign Out
             </button>
           </div>
-          <div className="text-center mb-8 mt-4">
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              AI Pathfinder
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
-              Tell us what you want to learn. Our AI agents will instantly synthesize a personalized, interactive curriculum.
-            </p>
-          </div>
-          <GoalChat />
-        </div>
-      ) : (
-        // Roadmap state: Show Dashboard, Canvas, and keep GoalChat at the bottom or top
-        <div className="w-full max-w-7xl flex flex-col gap-8 animate-in fade-in zoom-in duration-500">
-          <header className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              AI Pathfinder
-            </h1>
-            <div className="flex items-center gap-3">
-              {userEmail && (
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  {userEmail}
-                </div>
-              )}
-              <button 
-                onClick={handleSignOut}
-                className="text-sm px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-destructive/20 hover:text-destructive transition-colors"
-              >
-                Sign Out
-              </button>
-            </div>
-          </header>
-          
-          <LearnerDashboard />
-          
-          <div className="w-full relative shadow-[0_0_50px_rgba(var(--primary),0.1)] rounded-lg">
-            <RoadmapCanvas />
-          </div>
+        </header>
 
-          <div className="w-full max-w-2xl mx-auto mt-8">
+        {/* Center Prompt & Chat */}
+        <div className="w-full max-w-3xl mx-auto my-auto py-12 flex flex-col items-center text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-3 font-sans">
+            AI Pathfinder
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground max-w-lg mb-8 leading-relaxed">
+            Personalized, adaptive learning curricula generated in seconds. Tell us what you want to master.
+          </p>
+
+          <div className="w-full">
             <GoalChat />
           </div>
-
-          <NodeInspectorDrawer />
         </div>
-      )}
 
-    </main>
+        {/* Subtle Footer */}
+        <footer className="w-full max-w-4xl mx-auto text-center text-[11px] text-muted-foreground/60">
+          Powered by Gemini & Multi-Agent Curriculum Synthesis
+        </footer>
+      </main>
+    );
+  }
+
+  // Active Roadmap State: 3-Column Editorial Workspace
+  const totalNodes = roadmap.nodes.length;
+  const completedNodes = roadmap.nodes.filter(n => n.data.status === 'completed').length;
+
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row h-screen overflow-hidden">
+      {/* Column 1: Navigation Sidebar (Desktop fixed, Mobile Top Bar) */}
+      <div className="hidden lg:block shrink-0">
+        <AppSidebar
+          activeView={activeView}
+          onSelectView={setActiveView}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+          completedCount={completedNodes}
+          totalCount={totalNodes}
+        />
+      </div>
+
+      {/* Mobile Header Bar */}
+      <header className="lg:hidden h-14 px-4 border-b border-border bg-card flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-[10px]">
+            PF
+          </div>
+          <span className="font-extrabold text-sm tracking-tight">PATHFINDER</span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setActiveView('feed')}
+            className={`p-1.5 rounded-md text-xs ${activeView === 'feed' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
+          >
+            <Compass className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setActiveView('canvas')}
+            className={`p-1.5 rounded-md text-xs ${activeView === 'canvas' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
+          >
+            <GitFork className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setActiveView('cohort')}
+            className={`p-1.5 rounded-md text-xs ${activeView === 'cohort' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
+          >
+            <Users className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setActiveView('analytics')}
+            className={`p-1.5 rounded-md text-xs ${activeView === 'analytics' ? 'bg-muted text-foreground' : 'text-muted-foreground'}`}
+          >
+            <Activity className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-destructive"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* Main Workspace Body */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* Column 2: Center Feed / Viewport */}
+        {activeView === 'feed' && (
+          <>
+            {/* Center Feed List */}
+            <div className="flex-1 lg:max-w-xl xl:max-w-2xl border-r border-border/60 h-full overflow-hidden flex flex-col">
+              <MilestoneFeed onSelectMilestone={(nodeId) => setActiveNode(nodeId)} />
+            </div>
+
+            {/* Column 3: Right Studio Pane */}
+            <div className="flex-1 p-6 h-full overflow-hidden hidden lg:block bg-background">
+              <MilestoneStudioPane />
+            </div>
+          </>
+        )}
+
+        {/* Alternate View: Interactive Visual Graph */}
+        {activeView === 'canvas' && (
+          <div className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden">
+            <div className="flex-1 p-6 h-full overflow-hidden">
+              <RoadmapCanvas />
+            </div>
+            <div className="w-[420px] p-6 h-full overflow-hidden hidden xl:block border-l border-border/60">
+              <MilestoneStudioPane />
+            </div>
+          </div>
+        )}
+
+        {/* Alternate View: Cohort & Analytics Dashboard */}
+        {(activeView === 'cohort' || activeView === 'analytics') && (
+          <div className="flex-1 p-6 md:p-8 overflow-y-auto">
+            <div className="max-w-5xl mx-auto space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-border">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                    {activeView === 'cohort' ? 'Study Cohort & Peers' : 'Learning Analytics & Radar'}
+                  </h1>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Path to: {roadmap.target_role} • {roadmap.learner_summary}
+                  </p>
+                </div>
+              </div>
+              <LearnerDashboard />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Slide-out drawer for Mobile fallback */}
+      <div className="lg:hidden">
+        <NodeInspectorDrawer />
+      </div>
+    </div>
   );
 }

@@ -4,9 +4,11 @@ import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
 import { notFound } from 'next/navigation';
 import { GenerateRoadmapResponse } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 // Dynamically generate OpenGraph metadata based on the user's roadmap
-export async function generateMetadata({ params }: { params: Promise<{ username: string }> | { username: string } }): Promise<Metadata> {
-  const { username } = await Promise.resolve(params);
+export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
+  const { username } = await params;
   const roadmapData = await fetchRoadmap(username);
   
   if (!roadmapData) {
@@ -47,8 +49,8 @@ async function fetchRoadmap(username: string): Promise<GenerateRoadmapResponse |
   }
 }
 
-export default async function PublicRoadmapPage({ params }: { params: Promise<{ username: string }> | { username: string } }) {
-  const { username } = await Promise.resolve(params);
+export default async function PublicRoadmapPage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
   const data = await fetchRoadmap(username);
 
   if (!data) {

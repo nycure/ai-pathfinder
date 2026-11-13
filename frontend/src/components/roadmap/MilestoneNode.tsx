@@ -1,63 +1,60 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Lock, CheckCircle2, PlayCircle, Clock } from 'lucide-react';
 import { RoadmapNode } from '@/lib/types';
 
 export function MilestoneNode({ data, selected }: NodeProps<RoadmapNode>) {
   const statusIcons = {
-    locked: <Lock className="w-4 h-4 text-muted-foreground" />,
-    available: <PlayCircle className="w-4 h-4 text-primary" />,
-    in_progress: <PlayCircle className="w-4 h-4 text-accent" />,
-    completed: <CheckCircle2 className="w-4 h-4 text-green-500" />
-  };
-
-  const statusColors = {
-    locked: "bg-muted/50 border-muted text-muted-foreground",
-    available: "bg-primary/20 border-primary text-primary-foreground",
-    in_progress: "bg-accent/20 border-accent text-accent-foreground",
-    completed: "bg-green-500/20 border-green-500 text-green-400"
+    locked: <Lock className="w-3.5 h-3.5 text-muted-foreground" />,
+    available: <PlayCircle className="w-3.5 h-3.5 text-foreground" />,
+    in_progress: <PlayCircle className="w-3.5 h-3.5 text-foreground" />,
+    completed: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
   };
 
   return (
-    <div className="relative group min-w-[280px]">
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-primary/50 border-background" />
+    <div className="relative group min-w-[260px]">
+      <Handle type="target" position={Position.Top} className="w-2.5 h-2.5 bg-foreground border border-card" />
       
       <Card className={`
-        bg-card/50 backdrop-blur-md border-border transition-all duration-300
-        ${selected ? 'ring-2 ring-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]' : 'hover:border-primary/50'}
-        ${data.status === 'locked' ? 'opacity-70' : 'opacity-100'}
+        bg-card border-border transition-all duration-200 rounded-xl shadow-xs
+        ${selected ? 'ring-2 ring-foreground shadow-sm border-foreground' : 'hover:border-foreground/40'}
+        ${data.status === 'locked' ? 'opacity-60 bg-muted/30' : 'opacity-100'}
       `}>
         <CardHeader className="p-4 pb-2">
-          <div className="flex justify-between items-start gap-4">
-            <CardTitle className="text-lg font-bold leading-tight">
+          <div className="flex justify-between items-start gap-3">
+            <CardTitle className="text-sm font-bold leading-tight text-foreground">
               {data.label}
             </CardTitle>
             <div title={`Status: ${data.status}`}>
               {statusIcons[data.status]}
             </div>
           </div>
-          <div className="flex gap-2 text-xs text-muted-foreground mt-1 items-center">
+          <div className="flex gap-2 text-[11px] text-muted-foreground mt-1.5 items-center">
             <Clock className="w-3 h-3" />
-            <span>{data.estimated_weeks} weeks</span>
+            <span>{data.estimated_weeks}w</span>
             <span>•</span>
             <span className="capitalize">{data.difficulty}</span>
           </div>
         </CardHeader>
         
-        <CardContent className="p-4 pt-2">
-          <div className="flex flex-wrap gap-1 mt-2">
-            {data.skills_acquired.map(skill => (
-              <Badge key={skill} variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+        <CardContent className="p-4 pt-1">
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {data.skills_acquired.slice(0, 3).map(skill => (
+              <span key={skill} className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted/80 text-foreground border border-border/60">
                 {skill}
-              </Badge>
+              </span>
             ))}
+            {data.skills_acquired.length > 3 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted/50 text-muted-foreground">
+                +{data.skills_acquired.length - 3}
+              </span>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-primary/50 border-background" />
+      <Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-foreground border border-card" />
     </div>
   );
 }

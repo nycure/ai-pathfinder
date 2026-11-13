@@ -10,7 +10,6 @@ import {
   BackgroundVariant,
   Panel
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 
 import { useRoadmapStore } from '@/store/useRoadmapStore';
 import { MilestoneNode } from './MilestoneNode';
@@ -87,18 +86,18 @@ export function RoadmapCanvas({ readOnlyRoadmap, readOnly = false }: RoadmapCanv
         elementsSelectable={!readOnly}
         minZoom={0.2}
         maxZoom={1.5}
-        className="dark"
+        className="bg-background"
       >
         <Background 
           variant={BackgroundVariant.Dots} 
           gap={24} 
           size={1.5} 
-          color="oklch(1 0 0 / 15%)" 
+          color="#DFD7CE" 
         />
-        <Controls className="bg-card border-border fill-foreground" />
-        <Panel position="top-left" className="bg-card/80 backdrop-blur-md p-4 rounded-lg border border-border">
-          <h2 className="text-xl font-bold text-primary">{roadmap.title}</h2>
-          <p className="text-sm text-muted-foreground">{roadmap.total_estimated_weeks} weeks • {roadmap.total_hours} hours</p>
+        <Controls className="bg-card border-border fill-foreground rounded-lg shadow-xs" />
+        <Panel position="top-left" className="bg-card p-4 rounded-xl border border-border shadow-xs">
+          <h2 className="text-base font-bold text-foreground">{roadmap.title}</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{roadmap.total_estimated_weeks} weeks • {roadmap.total_hours} hours</p>
         </Panel>
       </ReactFlow>
     </div>
