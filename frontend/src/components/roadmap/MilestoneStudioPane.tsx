@@ -22,7 +22,7 @@ import { MasteryQuizModal } from './MasteryQuizModal';
 import { GitHubVerificationModal } from './GitHubVerificationModal';
 
 export function MilestoneStudioPane() {
-  const { activeNodeId, setActiveNode, roadmap, profile, completeNode, submitFeedback, isLoading } = useRoadmapStore();
+  const { activeNodeId, setActiveNode, roadmap, profile, submitFeedback, isLoading } = useRoadmapStore();
   const [activeTab, setActiveTab] = useState<'overview' | 'tutor' | 'feedback'>('overview');
   const [feedbackText, setFeedbackText] = useState('');
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -269,37 +269,43 @@ export function MilestoneStudioPane() {
           Step <span className="font-bold text-foreground">{activeIndex + 1}</span> / {nodes.length}
         </div>
 
-        {/* Action Buttons Group */}
+        {/* Dual-Track Active Validation Buttons */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsQuizOpen(true)}
-            disabled={isLoading || isLocked}
-            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-colors disabled:opacity-50"
-          >
-            Quiz
-          </button>
-
-          <button
-            onClick={() => setIsGitHubOpen(true)}
-            disabled={isLoading || isLocked}
-            className="px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-colors disabled:opacity-50"
-          >
-            Verify GitHub
-          </button>
-
           {isCompleted ? (
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold shadow-xs">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Completed</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold shadow-xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Mastered</span>
+              </span>
+              <button
+                onClick={() => setIsQuizOpen(true)}
+                disabled={isLoading}
+                className="px-2.5 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                title="Retake Quiz for revision"
+              >
+                Retake Quiz
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={() => completeNode(activeNode.id)}
-              disabled={isLoading || isLocked}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-foreground text-background hover:bg-foreground/90 text-xs font-semibold shadow-xs transition-all disabled:opacity-50"
-            >
-              <span>Complete Milestone</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsQuizOpen(true)}
+                disabled={isLoading || isLocked}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-foreground text-background hover:bg-foreground/90 text-xs font-semibold shadow-xs transition-all disabled:opacity-50"
+              >
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>Take Quiz</span>
+              </button>
+
+              <button
+                onClick={() => setIsGitHubOpen(true)}
+                disabled={isLoading || isLocked}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-colors disabled:opacity-50"
+              >
+                <GitBranch className="w-3.5 h-3.5 text-muted-foreground" />
+                <span>Verify GitHub</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
