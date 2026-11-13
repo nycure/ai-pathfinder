@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRoadmapStore } from '@/store/useRoadmapStore';
-import { api } from '@/lib/api';
-import { ExplainabilityResponse } from '@/lib/types';
 import { 
   FileEdit, 
   ExternalLink, 
@@ -26,8 +24,6 @@ import { GitHubVerificationModal } from './GitHubVerificationModal';
 export function MilestoneStudioPane() {
   const { activeNodeId, setActiveNode, roadmap, profile, completeNode, submitFeedback, isLoading } = useRoadmapStore();
   const [activeTab, setActiveTab] = useState<'overview' | 'tutor' | 'feedback'>('overview');
-  const [xaiData, setXaiData] = useState<ExplainabilityResponse | null>(null);
-  const [isXaiLoading, setIsXaiLoading] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [isGitHubOpen, setIsGitHubOpen] = useState(false);
@@ -37,25 +33,6 @@ export function MilestoneStudioPane() {
   // Find current node, or fallback to the first active/available one
   const activeNode = nodes.find(n => n.id === activeNodeId) || nodes.find(n => n.data.status !== 'completed') || nodes[0];
   const activeIndex = activeNode ? nodes.findIndex(n => n.id === activeNode.id) : 0;
-
-  // Fetch XAI when active node changes
-  useEffect(() => {
-    if (activeNode && roadmap && profile) {
-      const fetchXai = async () => {
-        setIsXaiLoading(true);
-        try {
-          const data = await api.explainNode(activeNode.id, profile, roadmap);
-          setXaiData(data);
-        } catch {
-          // Fallback to static explanation if XAI endpoint fails
-        } finally {
-          setIsXaiLoading(false);
-        }
-      };
-      setXaiData(null);
-      fetchXai();
-    }
-  }, [activeNode?.id, roadmap, profile]);
 
   if (!roadmap || !activeNode) {
     return (
@@ -215,16 +192,9 @@ export function MilestoneStudioPane() {
                 <BrainCircuit className="w-3.5 h-3.5" />
                 <span>Why this step in your sequence?</span>
               </div>
-              {isXaiLoading ? (
-                <div className="space-y-1.5 animate-pulse">
-                  <div className="h-3 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded w-1/2"></div>
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {xaiData?.justification || data.why_recommended}
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {data.why_recommended}
+              </p>
             </div>
 
             {/* Alternative Resources */}

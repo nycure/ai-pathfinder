@@ -44,7 +44,8 @@ class RoadmapAgent:
             "You are an expert technical curriculum designer. Your task is to generate a personalized, "
             "step-by-step learning path (a Directed Acyclic Graph) to help the user achieve their target role. "
             "You must generate 10 to 15 strict milestone skills required. Do not include skills the user already knows well. "
-            "Return the nodes (skills) and edges (prerequisites). Node IDs must be lowercase snake_case."
+            "For each skill node, provide a concise 2-sentence rationale explaining why it is critical for their goal "
+            "and how it fits into their sequence. Return the nodes (skills) and edges (prerequisites). Node IDs must be lowercase snake_case."
         )
 
     def _generate_dynamic_graph(self, profile: LearnerProfile) -> DynamicTaxonomyResponse:
@@ -56,17 +57,18 @@ class RoadmapAgent:
             f"Learning Pace: {profile.learning_pace}\n"
             f"Existing Skills (Do not include these in the learning path): {', '.join(existing_skills) if existing_skills else 'None'}\n\n"
             f"Generate a strict DAG of 10 to 15 milestone skills necessary to reach this goal. "
-            f"Provide the 'nodes' (id, name, description) and the 'edges' (source, target) where source is a prerequisite for target."
+            f"Provide the 'nodes' (id, name, description, rationale) and the 'edges' (source, target) where source is a prerequisite for target.\n"
+            f"For each node, synthesize a highly relevant 2-sentence 'rationale' explaining why this milestone is vital for becoming a {profile.target_role} and where it fits in the sequence."
         )
         
-        # Check cache before making expensive LLM call
+        # Check cache before making expensive LLM call (v2 includes pregenerated rationales)
         cache_key_kwargs = {"target_role": profile.target_role, "existing_skills": existing_skills}
-        cached_response = self.cache.get("dynamic_taxonomy", **cache_key_kwargs)
+        cached_response = self.cache.get("dynamic_taxonomy_v2", **cache_key_kwargs)
         if cached_response:
-            print("[CacheService] Cache HIT for dynamic_taxonomy")
+            print("[CacheService] Cache HIT for dynamic_taxonomy_v2")
             return DynamicTaxonomyResponse.model_validate_json(cached_response)
         
-        print("[CacheService] Cache MISS for dynamic_taxonomy")
+        print("[CacheService] Cache MISS for dynamic_taxonomy_v2")
         response_json_str = self.llm_client.generate_structured_output(
             prompt=prompt,
             response_schema=DynamicTaxonomyResponse,
@@ -74,7 +76,7 @@ class RoadmapAgent:
         )
         
         # Save to cache (TTL: 24 hours)
-        self.cache.set("dynamic_taxonomy", response_json_str, ttl_seconds=86400, **cache_key_kwargs)
+        self.cache.set("dynamic_taxonomy_v2", response_json_str, ttl_seconds=86400, **cache_key_kwargs)
         
         return DynamicTaxonomyResponse.model_validate_json(response_json_str)
 
@@ -178,6 +180,11 @@ class RoadmapAgent:
             # Use the LLM-generated description
             node_desc = skill_node.get("description", f"Learn {skill_node['name']}")
 
+            # Extract LLM-synthesized rationale or fallback gracefully
+            node_rationale = skill_node.get("rationale")
+            if not node_rationale:
+                node_rationale = f"{skill_node['name']} is a foundational {phase_title} skill required to build competency towards becoming a {profile.target_role}."
+
             node_data = RoadmapNodeData(
                 label=skill_node["name"],
                 phase=phase_num,
@@ -186,7 +193,7 @@ class RoadmapAgent:
                 status=status,
                 primary_resource=resources[0],
                 alternative_resources=resources[1:],
-                why_recommended=f"{skill_node['name']} is a required {phase_title} skill that unlocks more advanced milestones on your path.",
+                why_recommended=node_rationale,
                 skills_acquired=[skill_id],
                 estimated_weeks=2,
                 difficulty=difficulty

@@ -96,6 +96,10 @@ class DynamicNode(BaseModel):
     id: str = Field(..., description="Unique ID for this skill node (e.g. 'aws_iam'). Must be snake_case.")
     name: str = Field(..., description="Display name of the skill (e.g. 'AWS IAM & Security').")
     description: str = Field(..., description="Brief description of what this skill entails.")
+    rationale: str = Field(
+        default="",
+        description="2-3 sentence personalized justification for why this skill is needed for the learner's target role and how it unlocks subsequent milestones."
+    )
 
 class DynamicEdge(BaseModel):
     source: str = Field(..., description="The ID of the prerequisite skill node.")
